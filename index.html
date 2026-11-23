@@ -1,88 +1,341 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="UTF-8">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0b1120">
 <title>Today's Task &amp; Deadline · APTIV Proto Group</title>
 <style>
+:root{
+  --bg:#0b1120;--panel:#111827;--panel2:#0f172a;--border:#1e293b;--border2:#334155;
+  --text:#f1f5f9;--muted:#94a3b8;--dim:#64748b;
+  --blue:#38bdf8;--indigo:#818cf8;--green:#34d399;--amber:#fbbf24;--red:#f87171;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:#0f172a;color:#e2e8f0;font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;font-size:14px;line-height:1.45}
-header{position:sticky;top:0;z-index:10;background:#0f172ae6;backdrop-filter:blur(10px);border-bottom:1px solid #1e293b;padding:12px 16px}
-.hdr{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.hdr h1{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
-.hdr small{display:block;color:#94a3b8;font-size:11.5px;margin-top:2px}
+body{
+  margin:0;background:radial-gradient(1200px 500px at 15% -10%,#17255455,transparent),var(--bg);
+  color:var(--text);font-family:-apple-system,"Pretendard","Malgun Gothic","Segoe UI",sans-serif;
+  font-size:13.5px;line-height:1.5;font-variant-numeric:tabular-nums;
+}
+header{
+  position:sticky;top:0;z-index:20;
+  background:rgba(11,17,32,.86);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:12px 16px;
+}
+.wrap{max-width:1220px;margin:0 auto}
+.hdr{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,#0ea5e9,#6366f1);
+  display:grid;place-items:center;font-size:17px;box-shadow:0 4px 14px rgba(14,165,233,.3)
+}
+.brand h1{margin:0;font-size:16px;font-weight:800;letter-spacing:-.2px}
+.brand small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
 .ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input.q{background:#0b1426;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:7px 11px;font-size:13px;width:210px;max-width:60vw}
-button.rf{background:#1e293b;color:#38bdf8;border:1px solid #334155;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
-main{max-width:1100px;margin:0 auto;padding:14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
-.card{background:#111c33;border:1px solid #1e293b;border-radius:14px;padding:14px}
-.card h2{margin:0 0 10px;font-size:14px;color:#f8fafc;display:flex;justify-content:space-between;align-items:center}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.kpi{background:#0b1426;border-radius:10px;padding:8px 6px;text-align:center}
-.kpi b{display:block;font-size:17px;color:#38bdf8}.kpi i{font-style:normal;font-size:10.5px;color:#94a3b8}
-.item{border-top:1px solid #1e293b;padding:10px 0}.item:first-of-type{border-top:0}
-.item .t{font-weight:700;color:#f1f5f9}.item .m{color:#94a3b8;font-size:12px;margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 10px}
-.tag{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:#1e3a5f;color:#7dd3fc}
-.tag.r{background:#4c1d24;color:#fca5a5}.tag.g{background:#0f3b2e;color:#6ee7b7}.tag.y{background:#4a3410;color:#fcd34d}
-.bar{height:6px;background:#1e293b;border-radius:9px;overflow:hidden;margin-top:6px}.bar>i{display:block;height:100%;background:#38bdf8}
-.empty{color:#64748b;text-align:center;padding:16px}
-.err{color:#fca5a5;background:#4c1d2433;border:1px solid #7f1d1d;border-radius:10px;padding:12px}
-footer{max-width:1100px;margin:8px auto 24px;padding:0 16px;color:#64748b;font-size:11.5px;text-align:center}
+input.q{
+  background:var(--panel2);color:var(--text);border:1px solid var(--border2);
+  border-radius:9px;padding:7px 12px;font-size:13px;width:230px;max-width:65vw;outline:none;
+}
+input.q:focus{border-color:var(--blue)}
+button.rf{
+  background:var(--panel);color:var(--blue);border:1px solid var(--border2);
+  border-radius:9px;padding:7px 13px;font-weight:700;cursor:pointer;font-size:12.5px;
+}
+button.rf:hover{background:#1e293b}
+
+main{padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{
+  background:var(--panel);color:var(--muted);border:1px solid var(--border);
+  border-radius:99px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;
+}
+.tab.on{background:rgba(56,189,248,.14);color:var(--blue);border-color:rgba(56,189,248,.45)}
+
+/* Charts Row */
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px}
+.card{
+  background:linear-gradient(180deg,#111827,#0f172a);
+  border:1px solid var(--border);border-radius:14px;padding:15px;
+  box-shadow:0 8px 24px rgba(0,0,0,.22);
+}
+.card h2{
+  margin:0 0 12px;font-size:14px;font-weight:800;color:#f8fafc;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+}
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.gauge svg{width:76px;height:76px;transform:rotate(-90deg)}
+.gauge .gwrap{position:relative;width:76px;height:76px;margin:0 auto}
+.gauge .gval{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-size:13.5px;font-weight:800;color:#f8fafc;
+}
+.gauge .glbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:600}
+
+.stk{margin-bottom:11px}.stk:last-child{margin-bottom:0}
+.stk-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.stk-top span{color:var(--muted)}.stk-top b{color:var(--text)}
+.stk-bar{height:9px;background:#1e293b;border-radius:99px;overflow:hidden;display:flex;gap:1px}
+.stk-bar i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:10px;font-size:11px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.wrow{display:grid;grid-template-columns:72px 1fr 32px;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
+.wrow:last-child{margin-bottom:0}
+.wname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cbd5e1;font-weight:600}
+.wtrack{height:8px;background:#1e293b;border-radius:99px;overflow:hidden}
+.wtrack i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0ea5e9,#818cf8)}
+.wcnt{text-align:right;color:var(--blue);font-weight:700}
+
+/* Task Grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:#0b1220;border:1px solid #1e293b;border-radius:10px;padding:9px 6px;text-align:center}
+.kpi b{display:block;font-size:17px;color:var(--blue);font-weight:800}
+.kpi i{font-style:normal;font-size:10.5px;color:var(--muted)}
+
+.list{display:flex;flex-direction:column;gap:9px}
+.tcard{
+  background:#0b1220;border:1px solid #1e293b;border-left:3px solid var(--blue);
+  border-radius:10px;padding:10px 12px;transition:border-color .15s;
+}
+.tcard.p0{border-left-color:var(--red)}
+.tcard.p1{border-left-color:var(--amber)}
+.tcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.ttitle{font-weight:700;font-size:13.2px;color:#f8fafc;line-height:1.4;word-break:keep-all}
+.meta{
+  display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:7px;
+  font-size:11.5px;color:var(--muted);align-items:center;
+}
+.chip{display:inline-flex;align-items:center;gap:4px;background:#172033;padding:2px 8px;border-radius:6px;color:#cbd5e1}
+.tag{
+  display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:99px;
+  background:#1e3a5f;color:#7dd3fc;white-space:nowrap;flex-shrink:0;
+}
+.tag.r{background:#4c1d24;color:#fca5a5}
+.tag.g{background:#0f3b2e;color:#6ee7b7}
+.tag.y{background:#4a3410;color:#fcd34d}
+.pbar{height:5px;background:#1e293b;border-radius:99px;overflow:hidden;margin-top:8px}
+.pbar>i{display:block;height:100%;background:linear-gradient(90deg,#0ea5e9,#34d399)}
+
+.sys-ul{margin:6px 0 0;padding-left:16px;color:#cbd5e1;font-size:12px}
+.sys-ul li{margin-bottom:3px}
+.empty{color:var(--dim);text-align:center;padding:18px;font-size:12.5px}
+.err{color:#fca5a5;background:#4c1d2433;border:1px solid #7f1d1d;border-radius:10px;padding:14px}
+footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);font-size:11.5px;text-align:center}
+@media(max-width:520px){
+  main{padding:10px}.grid,.charts{grid-template-columns:1fr}
+  input.q{width:100%;max-width:none;flex:1}
+}
 </style>
 </head>
 <body>
 <header>
-  <div class="hdr">
-    <div>
-      <h1>✅ Today's Task &amp; Deadline</h1>
-      <small id="upd">데이터 불러오는 중…</small>
+  <div class="wrap hdr">
+    <div class="brand">
+      <div class="logo">✅</div>
+      <div>
+        <h1>Today's Task &amp; Deadline</h1>
+        <small id="upd">데이터 불러오는 중…</small>
+      </div>
     </div>
     <div class="ctrl">
-      <input class="q" id="q" type="search" placeholder="검색 (품명, 담당자, 고객사…)" oninput="render()">
+      <input class="q" id="q" type="search" placeholder="품명, 담당자, 고객사, P0 검색…" oninput="render()">
       <button class="rf" onclick="load()">🔄 새로고침</button>
     </div>
   </div>
 </header>
-<main><div id="app" class="grid"></div></main>
+
+<main class="wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-f="all">전체 보기</button>
+    <button class="tab" data-f="proto">🏭 Proto Shop</button>
+    <button class="tab" data-f="measure">📐 Measurement</button>
+    <button class="tab" data-f="imds">🖥️ IMDS/CAMDS</button>
+    <button class="tab" data-f="system">📌 System</button>
+  </div>
+  <section class="charts" id="charts"></section>
+  <section class="grid" id="app"></section>
+</main>
+
 <footer>APTIV Proto Group · Today's Task &amp; Deadline Snapshot</footer>
+
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const pri=p=>{p=String(p??'');return /^(0|P0)/i.test(p)?'<span class="tag r">P0</span>':/^(1|P1)/i.test(p)?'<span class="tag y">P1</span>':''};
-const bar=r=>{r=Math.max(0,Math.min(100,+r||0));return `<div class="bar"><i style="width:${r}%"></i></div>`};
-let DATA=null;
+let DATA=null, FILTER='all';
 
+document.querySelectorAll('#tabs .tab').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); FILTER=b.dataset.f; render();
+});
+
+function priInfo(p){
+  const s=String(p??'');
+  if(/^(0|P0)/i.test(s))return {cls:'p0',badge:'<span class="tag r">P0 긴급</span>'};
+  if(/^(1|P1)/i.test(s))return {cls:'p1',badge:'<span class="tag y">P1 우선</span>'};
+  return {cls:'',badge:''};
+}
+function dueTag(d){
+  if(!d)return '';
+  const today=new Date().toISOString().slice(0,10);
+  if(/^\d{4}-\d{2}-\d{2}$/.test(d) && d<today) return `<span class="tag r">⏰ ${esc(d)} 지연</span>`;
+  return `<span class="chip">⏰ ${esc(d)}</span>`;
+}
 function match(obj,kw){
   if(!kw)return true;
   return Object.values(obj).some(v=>String(v??'').toLowerCase().includes(kw));
 }
-function block(title,stats,items,fn){
+
+function gaugeSvg(pct,color,label){
+  const v=Math.max(0,Math.min(100,+pct||0)), r=31, c=2*Math.PI*r, off=c*(1-v/100);
+  return `<div class="gauge">
+    <div class="gwrap">
+      <svg viewBox="0 0 76 76">
+        <circle cx="38" cy="38" r="${r}" fill="none" stroke="#1e293b" stroke-width="7"/>
+        <circle cx="38" cy="38" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+      </svg>
+      <div class="gval">${v.toFixed(1)}%</div>
+    </div>
+    <div class="glbl">${label}</div>
+  </div>`;
+}
+function stkBar(title,right,segs){
+  const tot=Math.max(segs.reduce((a,s)=>a+(+s[0]||0),0),1);
+  return `<div class="stk">
+    <div class="stk-top"><span>${title}</span><b>${right}</b></div>
+    <div class="stk-bar">${segs.map(s=>`<i style="width:${((+s[0]||0)/tot*100).toFixed(1)}%;background:${s[1]}"></i>`).join('')}</div>
+  </div>`;
+}
+
+function renderCharts(){
+  const p=DATA.proto_shop||{},m=DATA.measurement||{},i=DATA.imds||{};
+  const ps=p.stats||{},ms=m.stats||{},is=i.stats||{};
+
+  // 담당자별 금일 업무 건수 집계
+  const owners={};
+  const addO=n=>{n=(n||'미지정').trim();owners[n]=(owners[n]||0)+1;};
+  (p.today_tasks||[]).forEach(x=>addO(x.worker));
+  (m.today_tasks||[]).forEach(x=>addO(x.owner));
+  (i.today_tasks||[]).forEach(x=>addO(x.pe_owner));
+  const topO=Object.entries(owners).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxO=Math.max(...topO.map(x=>x[1]),1);
+  const totalToday=(p.today_tasks?.length||0)+(m.today_tasks?.length||0)+(i.today_tasks?.length||0);
+
+  $('#charts').innerHTML=`
+    <div class="card">
+      <h2><span>📊 부문별 핵심 달성률</span><span class="tag g">KPI</span></h2>
+      <div class="gauges">
+        ${gaugeSvg(ps.overall_achievement_rate,'#38bdf8','Proto 달성률')}
+        ${gaugeSvg(ms.pass_rate,'#34d399','측정 합격률')}
+        ${gaugeSvg(is.completion_rate,'#818cf8','IMDS 완료율')}
+      </div>
+    </div>
+    <div class="card">
+      <h2><span>📈 공정 · 큐 진행 현황</span><span class="tag">Pipeline</span></h2>
+      ${stkBar('Proto 생산 실적',`${(ps.total_prod_qty||0).toLocaleString()} / ${(ps.total_plan_qty||0).toLocaleString()}`,[[ps.total_prod_qty,'#38bdf8'],[Math.max((ps.total_plan_qty||0)-(ps.total_prod_qty||0),0),'#1e293b']])}
+      ${stkBar('정밀측정 대기 큐',`CMM ${ms.active_cmm_queue||0} · 예정 ${ms.scheduled_count||0} · 대기 ${ms.waiting_count||0}`,[[ms.active_cmm_queue,'#34d399'],[ms.scheduled_count,'#38bdf8'],[ms.waiting_count,'#fbbf24']])}
+      ${stkBar('IMDS / CAMDS',`완료 ${is.completed_count||0} / 전체 ${is.total_count||0}`,[[is.completed_count,'#818cf8'],[is.requested_count,'#f87171'],[is.standby_count,'#475569']])}
+      <div class="legend">
+        <span><i class="dot" style="background:#38bdf8"></i>실적/예정</span>
+        <span><i class="dot" style="background:#34d399"></i>CMM</span>
+        <span><i class="dot" style="background:#fbbf24"></i>대기</span>
+        <span><i class="dot" style="background:#818cf8"></i>완료</span>
+        <span><i class="dot" style="background:#f87171"></i>의뢰중</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span>👥 금일 중점 업무 분포</span><span class="tag">총 ${totalToday}건</span></h2>
+      ${topO.length?topO.map(([name,cnt])=>`
+        <div class="wrow">
+          <div class="wname" title="${esc(name)}">${esc(name)}</div>
+          <div class="wtrack"><i style="width:${(cnt/maxO*100).toFixed(0)}%"></i></div>
+          <div class="wcnt">${cnt}건</div>
+        </div>`).join(''):'<div class="empty">집계 없음</div>'}
+    </div>`;
+}
+
+function section(id,title,stats,items,fn){
+  if(FILTER!=='all' && FILTER!==id) return '';
   const kw=$('#q').value.trim().toLowerCase();
   const list=(items||[]).filter(x=>match(x,kw));
-  return `<section class="card"><h2><span>${title}</span><span class="tag">${list.length}건</span></h2>
-    <div class="kpis">${stats.map(s=>`<div class="kpi"><b>${esc(s[1]??'-')}</b><i>${s[0]}</i></div>`).join('')}</div>`+
-    (list.length?list.map(fn).join(''):'<div class="empty">표시할 항목 없음</div>')+'</section>';
+  return `<section class="card">
+    <h2><span>${title}</span><span class="tag">${list.length}건</span></h2>
+    <div class="kpis">${stats.map(s=>`<div class="kpi"><b>${esc(s[1]??'-')}</b><i>${s[0]}</i></div>`).join('')}</div>
+    <div class="list">${list.length?list.map(fn).join(''):'<div class="empty">표시할 항목이 없습니다.</div>'}</div>
+  </section>`;
 }
+
 function render(){
   if(!DATA)return;
+  renderCharts();
   const p=DATA.proto_shop||{},m=DATA.measurement||{},i=DATA.imds||{},sy=DATA.systems||{};
   const ps=p.stats||{},ms=m.stats||{},is=i.stats||{};
+  const kw=$('#q').value.trim().toLowerCase();
+
   let html=
-    block('🏭 시작개발팀 · Proto Shop',[['프로젝트',ps.total_projects],['달성률',(ps.overall_achievement_rate??'-')+'%'],['긴급',ps.urgent_orders]],p.today_tasks,
-      x=>`<div class="item"><div class="t">${pri(x.priority)} ${esc(x.pjt_desc)}</div><div class="m"><span>${esc(x.pjt_no)}</span><span>👤 ${esc(x.worker)}</span>${x.target_date?`<span>⏰ ${esc(x.target_date)}</span>`:''}${x.on_time?`<span class="tag ${/done|ok/i.test(x.on_time)?'g':'y'}">${esc(x.on_time)}</span>`:''}</div>${x.plan_qty?bar(x.rate):''}</div>`)+
-    block('📐 정밀측정실 · Measurement',[['진행 대기',ms.total_active_queue??ms.waiting_count],['CMM Queue',ms.active_cmm_queue],['합격률',(ms.pass_rate??'-')+'%']],m.today_tasks,
-      x=>`<div class="item"><div class="t">${pri(x.priority)} ${esc(x.part_desc)}</div><div class="m"><span>#${esc(x.req_no)}</span><span>${esc(x.product_line)}</span><span>${esc(x.purpose)}</span><span>👤 ${esc(x.owner)}</span><span>📍 ${esc(x.place)}</span><span>⏰ ${esc(x.target_date)}</span>${x.status?`<span class="tag">${esc(x.status)}</span>`:''}</div></div>`)+
-    block('🖥️ System · IMDS / CAMDS',[['전체',is.total_count],['진행/의뢰',is.requested_count],['완료율',(is.completion_rate??'-')+'%']],i.today_tasks,
-      x=>`<div class="item"><div class="t"><span class="tag">${esc(x.type)}</span> ${esc(x.part_desc)}</div><div class="m"><span>${esc(x.customer)}</span><span>👤 ${esc(x.pe_owner)}</span><span>⏰ 마감 ${esc(x.due_date)}</span><span class="tag y">${esc(x.status_label)}</span></div></div>`);
-  const doms=(sy.domains||[]).filter(x=>match(x,$('#q').value.trim().toLowerCase()));
-  if(doms.length){
-    html+=`<section class="card"><h2><span>📌 System 현황 (SAP · VAVE · IMDS)</span><span class="tag">${doms.length}건</span></h2>`+
-      doms.map(x=>`<div class="item"><div class="t">${esc(x.name)} <span class="tag g">${esc(x.status)}</span></div><div class="m">${esc((x.actions||'').slice(0,260))}</div></div>`).join('')+'</section>';
+    section('proto','🏭 시작개발팀 · Proto Shop',
+      [['전체 프로젝트',ps.total_projects],['가동률',(ps.line_utilization??'-')+'%'],['긴급 오더',ps.urgent_orders]],
+      p.today_tasks, x=>{
+        const pr=priInfo(x.priority);
+        return `<div class="tcard ${pr.cls}">
+          <div class="tcard-top"><div class="ttitle">${esc(x.pjt_desc)}</div>${pr.badge}</div>
+          <div class="meta">
+            ${x.pjt_no&&x.pjt_no!=='-'?`<span class="chip">📁 ${esc(x.pjt_no)}</span>`:''}
+            <span class="chip">👤 ${esc(x.worker||'미지정')}</span>
+            ${dueTag(x.target_date)}
+            ${x.on_time?`<span class="tag ${/done|ok|time/i.test(x.on_time)?'g':'y'}">${esc(x.on_time)}</span>`:''}
+          </div>
+          ${x.plan_qty?`<div class="pbar"><i style="width:${Math.max(0,Math.min(100,+x.rate||0))}%"></i></div>`:''}
+        </div>`;
+      })+
+    section('measure','📐 정밀측정실 · Measurement',
+      [['전체 의뢰',ms.total_requests],['CMM Queue',ms.active_cmm_queue],['대기 건수',ms.waiting_count]],
+      m.today_tasks, x=>{
+        const pr=priInfo(x.priority);
+        return `<div class="tcard ${pr.cls}">
+          <div class="tcard-top"><div class="ttitle">${esc(x.part_desc)}</div>${pr.badge}</div>
+          <div class="meta">
+            <span class="chip">#${esc(x.req_no)} · ${esc(x.product_line)} · ${esc(x.purpose)}</span>
+            <span class="chip">👤 ${esc(x.owner||'미지정')}</span>
+            <span class="chip">📍 ${esc(x.place||'-')}</span>
+            ${dueTag(x.target_date)}
+            ${x.status?`<span class="tag">${esc(x.status)}</span>`:''}
+          </div>
+        </div>`;
+      })+
+    section('imds','🖥️ System · IMDS / CAMDS',
+      [['전체 건수',is.total_count],['진행/의뢰',is.requested_count],['대기 건수',is.standby_count]],
+      i.today_tasks, x=>{
+        return `<div class="tcard p1">
+          <div class="tcard-top"><div class="ttitle">${esc(x.part_desc)}</div><span class="tag">${esc(x.type)}</span></div>
+          <div class="meta">
+            <span class="chip">🏢 ${esc(x.customer)}</span>
+            <span class="chip">👤 ${esc(x.pe_owner||'미지정')}</span>
+            ${dueTag(x.due_date)}
+            <span class="tag y">${esc(x.status_label)}</span>
+          </div>
+        </div>`;
+      });
+
+  if(FILTER==='all'||FILTER==='system'){
+    const doms=(sy.domains||[]).filter(x=>match(x,kw));
+    html+=`<section class="card">
+      <h2><span>📌 System 현황 (SAP · VAVE · IMDS)</span><span class="tag">${doms.length}건</span></h2>
+      <div class="list">${doms.length?doms.map(x=>{
+        const lines=String(x.actions||'').split(/\s+-\s+|\n/).map(s=>s.replace(/^[\s\-\.]+/,'').trim()).filter(Boolean).slice(0,5);
+        return `<div class="tcard">
+          <div class="tcard-top"><div class="ttitle">${esc(x.name)}</div><span class="tag g">${esc(x.status)}</span></div>
+          ${lines.length?`<ul class="sys-ul">${lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>`:''}
+        </div>`;
+      }).join(''):'<div class="empty">표시할 항목이 없습니다.</div>'}</div>
+    </section>`;
   }
   $('#app').innerHTML=html;
 }
+
 async function load(){
   try{
     const r=await fetch('./tasks.json?t='+Date.now(),{cache:'no-store'});
