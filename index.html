@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="UTF-8">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b1120">
-<title>Today's Task &amp; Deadline · APTIV Proto Group</title>
+<title>Today's Task &amp; 근태 현황 · APTIV Proto Group</title>
 <style>
 :root{
   --bg:#0b1120;--panel:#111827;--panel2:#0f172a;--border:#1e293b;--border2:#334155;
@@ -33,11 +33,12 @@ header{
 .brand h1{margin:0;font-size:16px;font-weight:800;letter-spacing:-.2px}
 .brand small{display:block;color:var(--muted);font-size:11.5px;margin-top:1px}
 .ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input.q{
+input.q, select.sel{
   background:var(--panel2);color:var(--text);border:1px solid var(--border2);
-  border-radius:9px;padding:7px 12px;font-size:13px;width:230px;max-width:65vw;outline:none;
+  border-radius:9px;padding:7px 12px;font-size:13px;outline:none;
 }
-input.q:focus{border-color:var(--blue)}
+input.q{width:230px;max-width:65vw}
+input.q:focus, select.sel:focus{border-color:var(--blue)}
 button.rf{
   background:var(--panel);color:var(--blue);border:1px solid var(--border2);
   border-radius:9px;padding:7px 13px;font-weight:700;cursor:pointer;font-size:12.5px;
@@ -52,7 +53,6 @@ main{padding:16px}
 }
 .tab.on{background:rgba(56,189,248,.14);color:var(--blue);border-color:rgba(56,189,248,.45)}
 
-/* Charts Row */
 .charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px}
 .card{
   background:linear-gradient(180deg,#111827,#0f172a);
@@ -61,7 +61,7 @@ main{padding:16px}
 }
 .card h2{
   margin:0 0 12px;font-size:14px;font-weight:800;color:#f8fafc;
-  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
 }
 .gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
 .gauge svg{width:76px;height:76px;transform:rotate(-90deg)}
@@ -81,15 +81,14 @@ main{padding:16px}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 
-.wrow{display:grid;grid-template-columns:72px 1fr 32px;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
+.wrow{display:grid;grid-template-columns:72px 1fr 48px;align-items:center;gap:8px;margin-bottom:7px;font-size:12px}
 .wrow:last-child{margin-bottom:0}
 .wname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#cbd5e1;font-weight:600}
 .wtrack{height:8px;background:#1e293b;border-radius:99px;overflow:hidden}
 .wtrack i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0ea5e9,#818cf8)}
 .wcnt{text-align:right;color:var(--blue);font-weight:700}
 
-/* Task Grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .kpi{background:#0b1220;border:1px solid #1e293b;border-radius:10px;padding:9px 6px;text-align:center}
 .kpi b{display:block;font-size:17px;color:var(--blue);font-weight:800}
@@ -98,10 +97,12 @@ main{padding:16px}
 .list{display:flex;flex-direction:column;gap:9px}
 .tcard{
   background:#0b1220;border:1px solid #1e293b;border-left:3px solid var(--blue);
-  border-radius:10px;padding:10px 12px;transition:border-color .15s;
+  border-radius:10px;padding:10px 12px;transition:border-color .15s,background .15s;
 }
 .tcard.p0{border-left-color:var(--red)}
 .tcard.p1{border-left-color:var(--amber)}
+.tcard.ok{border-left-color:var(--green)}
+.tcard.clk{cursor:pointer}.tcard.clk:hover{background:#131d33}
 .tcard-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .ttitle{font-weight:700;font-size:13.2px;color:#f8fafc;line-height:1.4;word-break:keep-all}
 .meta{
@@ -121,6 +122,11 @@ main{padding:16px}
 
 .sys-ul{margin:6px 0 0;padding-left:16px;color:#cbd5e1;font-size:12px}
 .sys-ul li{margin-bottom:3px}
+
+/* Attendance detail table & chart */
+.drow{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-top:1px solid #1e293b;font-size:12.5px}
+.drow:first-child{border-top:0}
+.svgbox{width:100%;overflow-x:auto;margin:8px 0 12px}
 .empty{color:var(--dim);text-align:center;padding:18px;font-size:12.5px}
 .err{color:#fca5a5;background:#4c1d2433;border:1px solid #7f1d1d;border-radius:10px;padding:14px}
 footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);font-size:11.5px;text-align:center}
@@ -136,12 +142,12 @@ footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);fo
     <div class="brand">
       <div class="logo">✅</div>
       <div>
-        <h1>Today's Task &amp; Deadline</h1>
+        <h1>Today's Task &amp; 근태 현황</h1>
         <small id="upd">데이터 불러오는 중…</small>
       </div>
     </div>
     <div class="ctrl">
-      <input class="q" id="q" type="search" placeholder="품명, 담당자, 고객사, P0 검색…" oninput="render()">
+      <input class="q" id="q" type="search" placeholder="품명, 담당자, 사원명, P0 검색…" oninput="render()">
       <button class="rf" onclick="load()">🔄 새로고침</button>
     </div>
   </div>
@@ -149,26 +155,30 @@ footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);fo
 
 <main class="wrap">
   <div class="tabs" id="tabs">
-    <button class="tab on" data-f="all">전체 보기</button>
+    <button class="tab on" data-f="all">✅ Today's Task</button>
     <button class="tab" data-f="proto">🏭 Proto Shop</button>
     <button class="tab" data-f="measure">📐 Measurement</button>
     <button class="tab" data-f="imds">🖥️ IMDS/CAMDS</button>
     <button class="tab" data-f="system">📌 System</button>
+    <button class="tab" data-f="attendance">⏱️ 근태 Analytics Pro</button>
   </div>
   <section class="charts" id="charts"></section>
   <section class="grid" id="app"></section>
+  <section id="attDetWrap" style="margin-top:14px"></section>
 </main>
 
-<footer>APTIV Proto Group · Today's Task &amp; Deadline Snapshot</footer>
+<footer>APTIV Proto Group · Today's Task &amp; 근태 현황 Snapshot</footer>
 
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let DATA=null, FILTER='all';
+let DATA=null, ATT=null, FILTER='all', ATT_MONTH=null, ATT_EMP=null;
 
 document.querySelectorAll('#tabs .tab').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); FILTER=b.dataset.f; render();
+  b.classList.add('on'); FILTER=b.dataset.f;
+  $('#attDetWrap').innerHTML='';
+  render();
 });
 
 function priInfo(p){
@@ -210,11 +220,9 @@ function stkBar(title,right,segs){
   </div>`;
 }
 
-function renderCharts(){
+function renderTaskCharts(){
   const p=DATA.proto_shop||{},m=DATA.measurement||{},i=DATA.imds||{};
   const ps=p.stats||{},ms=m.stats||{},is=i.stats||{};
-
-  // 담당자별 금일 업무 건수 집계
   const owners={};
   const addO=n=>{n=(n||'미지정').trim();owners[n]=(owners[n]||0)+1;};
   (p.today_tasks||[]).forEach(x=>addO(x.worker));
@@ -257,6 +265,118 @@ function renderCharts(){
     </div>`;
 }
 
+function renderAttendance(){
+  if(!ATT || !ATT.meta){
+    $('#charts').innerHTML='';
+    $('#app').innerHTML='<div class="err">⏱️ 근태 데이터(attendance.json)가 아직 없습니다. sync_tasks.ps1을 실행해 주세요.</div>';
+    return;
+  }
+  const M=ATT.meta;
+  if(!ATT_MONTH || !ATT.summaries[ATT_MONTH]) ATT_MONTH=M.months[0];
+  const kw=$('#q').value.trim().toLowerCase();
+  const rows=(ATT.summaries[ATT_MONTH]||[]).filter(r=>match(r,kw));
+  const avgRate=rows.length?rows.reduce((a,r)=>a+(+r.rate||0),0)/rows.length:0;
+  const avgAct=rows.length?rows.reduce((a,r)=>a+(+r.actual||0),0)/rows.length:0;
+  const overCnt=rows.filter(r=>r.diff>=0).length;
+  const maxH=Math.max(...rows.map(r=>Math.max(+r.actual||0,+r.base||0)),1);
+
+  $('#charts').innerHTML=`
+    <div class="card">
+      <h2><span>⏱️ 근태 요약 (${esc(ATT_MONTH)})</span><span class="tag">${esc(M.last_updated||'')}</span></h2>
+      <div style="margin-bottom:10px">
+        <select class="sel" style="width:100%" onchange="ATT_MONTH=this.value;ATT_EMP=null;$('#attDetWrap').innerHTML='';render()">
+          ${M.months.map(x=>`<option ${x===ATT_MONTH?'selected':''}>${esc(x)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="gauges" style="grid-template-columns:1fr 1fr">
+        ${gaugeSvg(avgRate,'#34d399','평균 달성률')}
+        <div class="kpis" style="grid-template-columns:1fr;margin:0;align-content:center">
+          <div class="kpi"><b>${avgAct.toFixed(1)}h</b><i>평균 실근무</i></div>
+          <div class="kpi"><b>${overCnt} / ${rows.length}명</b><i>기준 충족 인원</i></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="grid-column:span 1">
+      <h2><span>📊 팀원별 실근무 시간 비교</span><span class="tag g">단위: h</span></h2>
+      ${rows.map(r=>`
+        <div class="wrow">
+          <div class="wname">${esc(r.name)}</div>
+          <div class="wtrack"><i style="width:${(r.actual/maxH*100).toFixed(0)}%;background:${r.diff>=0?'linear-gradient(90deg,#10b981,#38bdf8)':'linear-gradient(90deg,#f59e0b,#f87171)'}"></i></div>
+          <div class="wcnt" style="color:${r.diff>=0?'var(--green)':'var(--red)'}">${r.actual}h</div>
+        </div>`).join('')}
+    </div>`;
+
+  $('#app').innerHTML=`
+    <section class="card" style="grid-column:1/-1">
+      <h2><span>👥 사원별 근태 현황 (클릭 시 일별 상세)</span><span class="tag">${rows.length}명</span></h2>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
+        ${rows.map(r=>`
+          <div class="tcard clk ${r.diff>=0?'ok':'p0'}" onclick="showAttDetail('${esc(r.name)}')">
+            <div class="tcard-top">
+              <div class="ttitle">${esc(r.name)} <span class="tag">${esc(r.site)}</span></div>
+              <span class="tag ${r.diff>=0?'g':'r'}">${r.diff>=0?'+':''}${r.diff}h (${r.rate}%)</span>
+            </div>
+            <div class="meta">
+              <span class="chip">기준 ${r.base}h</span>
+              <span class="chip">실근무 ${r.actual}h</span>
+              <span class="chip">대체 ${r.alt}h</span>
+            </div>
+            <div class="pbar"><i style="width:${Math.max(0,Math.min(100,+r.rate||0))}%;background:${r.diff>=0?'#34d399':'#f87171'}"></i></div>
+          </div>`).join('')}
+      </div>
+    </section>`;
+
+  if(ATT_EMP) showAttDetail(ATT_EMP, true);
+}
+
+function showAttDetail(emp, noScroll){
+  ATT_EMP=emp;
+  const d=(ATT.details[ATT_MONTH]||{})[emp];
+  if(!d){$('#attDetWrap').innerHTML='';return;}
+  const co=Math.min(d.cutoff_day||d.days.length, d.days.length);
+  const maxCum=Math.max(...d.cum_hours.slice(0,co), ...d.cum_base.slice(0,co), 1);
+  const W=620, H=150, P=20;
+  const pts=(arr)=>arr.slice(0,co).map((v,idx)=>{
+    const x=P+(co>1?idx/(co-1)*(W-P*2):0);
+    const y=H-P-(v/maxCum*(H-P*2));
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+
+  let rows='';
+  for(let i=0;i<co;i++){
+    const a=d.actual_work[i], al=d.alt_leave[i], an=d.annual_leave[i], hol=d.holiday_flags[i];
+    if(!a&&!al&&!an&&hol) continue;
+    rows+=`<div class="drow">
+      <span><b>${d.days[i]}일</b> ${hol?'<span class="tag r">휴일</span>':''} ${an?'<span class="tag g">연차 '+an+'h</span>':''} ${al?'<span class="tag y">대체 '+al+'h</span>':''}</span>
+      <span>실근무 <b>${a}h</b> · 누적 ${d.cum_hours[i]}h <span class="tag ${d.diff_hours[i]>=0?'g':'r'}">${d.diff_hours[i]>=0?'+':''}${d.diff_hours[i]}h</span></span>
+    </div>`;
+  }
+  $('#attDetWrap').innerHTML=`
+    <section class="card">
+      <h2>
+        <span>👤 ${esc(emp)} 일별 근태 상세 (${esc(ATT_MONTH)})</span>
+        <button class="rf" onclick="ATT_EMP=null;$('#attDetWrap').innerHTML=''">닫기</button>
+      </h2>
+      <div class="kpis">
+        <div class="kpi"><b>${d.cum_hours[co-1]}h</b><i>누적 실근무</i></div>
+        <div class="kpi"><b>${d.cum_base[co-1]}h</b><i>누적 기준</i></div>
+        <div class="kpi"><b style="color:${d.diff_hours[co-1]>=0?'var(--green)':'var(--red)'}">${d.diff_hours[co-1]>=0?'+':''}${d.diff_hours[co-1]}h</b><i>과부족</i></div>
+      </div>
+      <div class="svgbox">
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:360px;height:150px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
+          <polyline fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4 4" points="${pts(d.cum_base)}"/>
+          <polyline fill="none" stroke="#38bdf8" stroke-width="2.5" points="${pts(d.cum_hours)}"/>
+        </svg>
+        <div class="legend">
+          <span><i class="dot" style="background:#38bdf8"></i>누적 실근무</span>
+          <span><i class="dot" style="background:#64748b"></i>누적 기준 (점선)</span>
+        </div>
+      </div>
+      <div>${rows||'<div class="empty">기록 없음</div>'}</div>
+    </section>`;
+  if(!noScroll) $('#attDetWrap').scrollIntoView({behavior:'smooth'});
+}
+
 function section(id,title,stats,items,fn){
   if(FILTER!=='all' && FILTER!==id) return '';
   const kw=$('#q').value.trim().toLowerCase();
@@ -269,8 +389,9 @@ function section(id,title,stats,items,fn){
 }
 
 function render(){
+  if(FILTER==='attendance'){ renderAttendance(); return; }
   if(!DATA)return;
-  renderCharts();
+  renderTaskCharts();
   const p=DATA.proto_shop||{},m=DATA.measurement||{},i=DATA.imds||{},sy=DATA.systems||{};
   const ps=p.stats||{},ms=m.stats||{},is=i.stats||{};
   const kw=$('#q').value.trim().toLowerCase();
@@ -338,9 +459,13 @@ function render(){
 
 async function load(){
   try{
-    const r=await fetch('./tasks.json?t='+Date.now(),{cache:'no-store'});
-    if(!r.ok)throw new Error('tasks.json HTTP '+r.status);
-    DATA=await r.json();
+    const [tr, ar]=await Promise.all([
+      fetch('./tasks.json?t='+Date.now(),{cache:'no-store'}),
+      fetch('./attendance.json?t='+Date.now(),{cache:'no-store'}).catch(()=>null)
+    ]);
+    if(!tr.ok)throw new Error('tasks.json HTTP '+tr.status);
+    DATA=await tr.json();
+    if(ar && ar.ok) ATT=await ar.json();
     $('#upd').textContent='기준 시각: '+(DATA.timestamp||'-');
     render();
   }catch(e){
