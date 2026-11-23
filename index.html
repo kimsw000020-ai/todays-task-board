@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Today's Task &amp; Deadline · APTIV Proto Group</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0f172a;color:#e2e8f0;font-family:-apple-system,"Segoe UI","Malgun Gothic",sans-serif;font-size:14px;line-height:1.45}
+header{position:sticky;top:0;z-index:10;background:#0f172ae6;backdrop-filter:blur(10px);border-bottom:1px solid #1e293b;padding:12px 16px}
+.hdr{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hdr h1{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.hdr small{display:block;color:#94a3b8;font-size:11.5px;margin-top:2px}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input.q{background:#0b1426;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:7px 11px;font-size:13px;width:210px;max-width:60vw}
+button.rf{background:#1e293b;color:#38bdf8;border:1px solid #334155;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
+main{max-width:1100px;margin:0 auto;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.card{background:#111c33;border:1px solid #1e293b;border-radius:14px;padding:14px}
+.card h2{margin:0 0 10px;font-size:14px;color:#f8fafc;display:flex;justify-content:space-between;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.kpi{background:#0b1426;border-radius:10px;padding:8px 6px;text-align:center}
+.kpi b{display:block;font-size:17px;color:#38bdf8}.kpi i{font-style:normal;font-size:10.5px;color:#94a3b8}
+.item{border-top:1px solid #1e293b;padding:10px 0}.item:first-of-type{border-top:0}
+.item .t{font-weight:700;color:#f1f5f9}.item .m{color:#94a3b8;font-size:12px;margin-top:4px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:#1e3a5f;color:#7dd3fc}
+.tag.r{background:#4c1d24;color:#fca5a5}.tag.g{background:#0f3b2e;color:#6ee7b7}.tag.y{background:#4a3410;color:#fcd34d}
+.bar{height:6px;background:#1e293b;border-radius:9px;overflow:hidden;margin-top:6px}.bar>i{display:block;height:100%;background:#38bdf8}
+.empty{color:#64748b;text-align:center;padding:16px}
+.err{color:#fca5a5;background:#4c1d2433;border:1px solid #7f1d1d;border-radius:10px;padding:12px}
+footer{max-width:1100px;margin:8px auto 24px;padding:0 16px;color:#64748b;font-size:11.5px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr">
+    <div>
+      <h1>✅ Today's Task &amp; Deadline</h1>
+      <small id="upd">데이터 불러오는 중…</small>
+    </div>
+    <div class="ctrl">
+      <input class="q" id="q" type="search" placeholder="검색 (품명, 담당자, 고객사…)" oninput="render()">
+      <button class="rf" onclick="load()">🔄 새로고침</button>
+    </div>
+  </div>
+</header>
+<main><div id="app" class="grid"></div></main>
+<footer>APTIV Proto Group · Today's Task &amp; Deadline Snapshot</footer>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pri=p=>{p=String(p??'');return /^(0|P0)/i.test(p)?'<span class="tag r">P0</span>':/^(1|P1)/i.test(p)?'<span class="tag y">P1</span>':''};
+const bar=r=>{r=Math.max(0,Math.min(100,+r||0));return `<div class="bar"><i style="width:${r}%"></i></div>`};
+let DATA=null;
+
+function match(obj,kw){
+  if(!kw)return true;
+  return Object.values(obj).some(v=>String(v??'').toLowerCase().includes(kw));
+}
+function block(title,stats,items,fn){
+  const kw=$('#q').value.trim().toLowerCase();
+  const list=(items||[]).filter(x=>match(x,kw));
+  return `<section class="card"><h2><span>${title}</span><span class="tag">${list.length}건</span></h2>
+    <div class="kpis">${stats.map(s=>`<div class="kpi"><b>${esc(s[1]??'-')}</b><i>${s[0]}</i></div>`).join('')}</div>`+
+    (list.length?list.map(fn).join(''):'<div class="empty">표시할 항목 없음</div>')+'</section>';
+}
+function render(){
+  if(!DATA)return;
+  const p=DATA.proto_shop||{},m=DATA.measurement||{},i=DATA.imds||{},sy=DATA.systems||{};
+  const ps=p.stats||{},ms=m.stats||{},is=i.stats||{};
+  let html=
+    block('🏭 시작개발팀 · Proto Shop',[['프로젝트',ps.total_projects],['달성률',(ps.overall_achievement_rate??'-')+'%'],['긴급',ps.urgent_orders]],p.today_tasks,
+      x=>`<div class="item"><div class="t">${pri(x.priority)} ${esc(x.pjt_desc)}</div><div class="m"><span>${esc(x.pjt_no)}</span><span>👤 ${esc(x.worker)}</span>${x.target_date?`<span>⏰ ${esc(x.target_date)}</span>`:''}${x.on_time?`<span class="tag ${/done|ok/i.test(x.on_time)?'g':'y'}">${esc(x.on_time)}</span>`:''}</div>${x.plan_qty?bar(x.rate):''}</div>`)+
+    block('📐 정밀측정실 · Measurement',[['진행 대기',ms.total_active_queue??ms.waiting_count],['CMM Queue',ms.active_cmm_queue],['합격률',(ms.pass_rate??'-')+'%']],m.today_tasks,
+      x=>`<div class="item"><div class="t">${pri(x.priority)} ${esc(x.part_desc)}</div><div class="m"><span>#${esc(x.req_no)}</span><span>${esc(x.product_line)}</span><span>${esc(x.purpose)}</span><span>👤 ${esc(x.owner)}</span><span>📍 ${esc(x.place)}</span><span>⏰ ${esc(x.target_date)}</span>${x.status?`<span class="tag">${esc(x.status)}</span>`:''}</div></div>`)+
+    block('🖥️ System · IMDS / CAMDS',[['전체',is.total_count],['진행/의뢰',is.requested_count],['완료율',(is.completion_rate??'-')+'%']],i.today_tasks,
+      x=>`<div class="item"><div class="t"><span class="tag">${esc(x.type)}</span> ${esc(x.part_desc)}</div><div class="m"><span>${esc(x.customer)}</span><span>👤 ${esc(x.pe_owner)}</span><span>⏰ 마감 ${esc(x.due_date)}</span><span class="tag y">${esc(x.status_label)}</span></div></div>`);
+  const doms=(sy.domains||[]).filter(x=>match(x,$('#q').value.trim().toLowerCase()));
+  if(doms.length){
+    html+=`<section class="card"><h2><span>📌 System 현황 (SAP · VAVE · IMDS)</span><span class="tag">${doms.length}건</span></h2>`+
+      doms.map(x=>`<div class="item"><div class="t">${esc(x.name)} <span class="tag g">${esc(x.status)}</span></div><div class="m">${esc((x.actions||'').slice(0,260))}</div></div>`).join('')+'</section>';
+  }
+  $('#app').innerHTML=html;
+}
+async function load(){
+  try{
+    const r=await fetch('./tasks.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('tasks.json HTTP '+r.status);
+    DATA=await r.json();
+    $('#upd').textContent='기준 시각: '+(DATA.timestamp||'-');
+    render();
+  }catch(e){
+    $('#app').innerHTML=`<div class="err">⚠️ 데이터를 불러오지 못했습니다: ${esc(e.message)}</div>`;
+  }
+}
+load();
+</script>
+</body>
+</html>
