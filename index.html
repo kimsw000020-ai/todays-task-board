@@ -331,12 +331,15 @@ function renderAttendance(){
   });
   const avgRate=rows.length?rows.reduce((a,r)=>a+(+r.rate||0),0)/rows.length:0;
   const avgAct=rows.length?rows.reduce((a,r)=>a+(+r.actual||0),0)/rows.length:0;
-  const overCnt=rows.filter(r=>r.diff>=0).length;
+  const okCnt=rows.filter(r=>r.diff>=0).length;
+  const ngCnt=rows.length-okCnt;
+  const coDay=rows[0]?.cutoff_day;
+  const coText=rows[0]?.is_current_month && coDay ? `${coDay}일까지 기준 (08시 전일마감)` : '월 전체 기준';
   const maxH=Math.max(...rows.map(r=>Math.max(+r.actual||0,+r.base||0)),1);
 
   $('#charts').innerHTML=`
     <div class="card">
-      <h2><span>⏱️ 근태 요약 (${esc(ATT_MONTH)})</span><span class="tag">${esc(M.last_updated||'')}</span></h2>
+      <h2><span>⏱️ 근태 요약 (${esc(ATT_MONTH)})</span><span class="tag">${esc(coText)}</span></h2>
       <div style="display:flex;gap:6px;margin-bottom:10px">
         <select class="sel" style="flex:1" onchange="ATT_MONTH=this.value;ATT_EMP=null;$('#attDetWrap').innerHTML='';render()">
           ${M.months.map(x=>`<option ${x===ATT_MONTH?'selected':''}>${esc(x)}</option>`).join('')}
@@ -352,7 +355,7 @@ function renderAttendance(){
         ${gaugeSvg(avgRate,'#34d399','평균 달성률')}
         <div class="kpis" style="grid-template-columns:1fr;margin:0;align-content:center">
           <div class="kpi"><b>${avgAct.toFixed(1)}h</b><i>평균 실근무</i></div>
-          <div class="kpi"><b>${overCnt} / ${rows.length}명</b><i>기준 충족 인원</i></div>
+          <div class="kpi"><b>OK ${okCnt} · NG ${ngCnt}</b><i>전일 기준 판정</i></div>
         </div>
       </div>
     </div>
@@ -374,7 +377,7 @@ function renderAttendance(){
           <div class="tcard clk ${r.diff>=0?'ok':'p0'}" onclick="showAttDetail('${esc(r.name)}')">
             <div class="tcard-top">
               <div class="ttitle">${esc(r.name)} ${deptBadge(r.name)} <span class="tag">${esc(r.site)}</span></div>
-              <span class="tag ${r.diff>=0?'g':'r'}">${r.diff>=0?'+':''}${r.diff}h (${r.rate}%)</span>
+              <span class="tag ${r.diff>=0?'g':'r'}">${r.diff>=0?'OK':'NG'} ${r.diff>=0?'+':''}${r.diff}h (${r.rate}%)</span>
             </div>
             <div class="meta">
               <span class="chip">기준 ${r.base}h</span>
