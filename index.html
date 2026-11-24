@@ -208,7 +208,19 @@ footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);fo
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let DATA=null, ATT=null, FILTER='all', ATT_MONTH=null, ATT_EMP=null;
+let DATA=null, ATT=null, FILTER='all', ATT_MONTH=null, ATT_EMP=null, ATT_DEPT='all';
+const TEAM_DEPT={
+  '김성훈':'Proto Shop','박동근':'Proto Shop','장은주':'Proto Shop','서민숙':'Proto Shop','이은순':'Proto Shop','정성호':'Proto Shop(GP)',
+  '김예경':'측정','박성우':'측정','김선진':'측정',
+  '김승영':'System','이상진':'System',
+  '김성웅':'총괄'
+};
+function deptOf(n){return TEAM_DEPT[(n||'').trim()]||'';}
+function deptBadge(n){
+  const d=deptOf(n); if(!d)return '';
+  const c=d.startsWith('Proto')?'':d==='측정'?'g':d==='총괄'?'y':'';
+  return `<span class="tag ${c}">${esc(d)}</span>`;
+}
 
 document.querySelectorAll('#tabs .tab').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#tabs .tab').forEach(x=>x.classList.remove('on'));
@@ -310,7 +322,13 @@ function renderAttendance(){
   const M=ATT.meta;
   if(!ATT_MONTH || !ATT.summaries[ATT_MONTH]) ATT_MONTH=M.months[0];
   const kw=$('#q').value.trim().toLowerCase();
-  const rows=(ATT.summaries[ATT_MONTH]||[]).filter(r=>match(r,kw));
+  const rows=(ATT.summaries[ATT_MONTH]||[]).filter(r=>{
+    const d=deptOf(r.name);
+    if(ATT_DEPT==='proto' && !d.startsWith('Proto')) return false;
+    if(ATT_DEPT==='measure' && d!=='측정') return false;
+    if(ATT_DEPT==='system' && d!=='System' && d!=='총괄') return false;
+    return match({...r,dept:d},kw);
+  });
   const avgRate=rows.length?rows.reduce((a,r)=>a+(+r.rate||0),0)/rows.length:0;
   const avgAct=rows.length?rows.reduce((a,r)=>a+(+r.actual||0),0)/rows.length:0;
   const overCnt=rows.filter(r=>r.diff>=0).length;
@@ -319,9 +337,15 @@ function renderAttendance(){
   $('#charts').innerHTML=`
     <div class="card">
       <h2><span>⏱️ 근태 요약 (${esc(ATT_MONTH)})</span><span class="tag">${esc(M.last_updated||'')}</span></h2>
-      <div style="margin-bottom:10px">
-        <select class="sel" style="width:100%" onchange="ATT_MONTH=this.value;ATT_EMP=null;$('#attDetWrap').innerHTML='';render()">
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <select class="sel" style="flex:1" onchange="ATT_MONTH=this.value;ATT_EMP=null;$('#attDetWrap').innerHTML='';render()">
           ${M.months.map(x=>`<option ${x===ATT_MONTH?'selected':''}>${esc(x)}</option>`).join('')}
+        </select>
+        <select class="sel" style="flex:1" onchange="ATT_DEPT=this.value;ATT_EMP=null;$('#attDetWrap').innerHTML='';render()">
+          <option value="all" ${ATT_DEPT==='all'?'selected':''}>전체 소속</option>
+          <option value="proto" ${ATT_DEPT==='proto'?'selected':''}>Proto Shop</option>
+          <option value="measure" ${ATT_DEPT==='measure'?'selected':''}>측정</option>
+          <option value="system" ${ATT_DEPT==='system'?'selected':''}>System · 총괄</option>
         </select>
       </div>
       <div class="gauges" style="grid-template-columns:1fr 1fr">
@@ -336,7 +360,7 @@ function renderAttendance(){
       <h2><span>📊 팀원별 실근무 시간 비교</span><span class="tag g">단위: h</span></h2>
       ${rows.map(r=>`
         <div class="wrow">
-          <div class="wname">${esc(r.name)}</div>
+          <div class="wname" title="${esc(r.name)} (${esc(deptOf(r.name))})">${esc(r.name)}</div>
           <div class="wtrack"><i style="width:${(r.actual/maxH*100).toFixed(0)}%;background:${r.diff>=0?'linear-gradient(90deg,#10b981,#38bdf8)':'linear-gradient(90deg,#f59e0b,#f87171)'}"></i></div>
           <div class="wcnt" style="color:${r.diff>=0?'var(--green)':'var(--red)'}">${r.actual}h</div>
         </div>`).join('')}
@@ -349,7 +373,7 @@ function renderAttendance(){
         ${rows.map(r=>`
           <div class="tcard clk ${r.diff>=0?'ok':'p0'}" onclick="showAttDetail('${esc(r.name)}')">
             <div class="tcard-top">
-              <div class="ttitle">${esc(r.name)} <span class="tag">${esc(r.site)}</span></div>
+              <div class="ttitle">${esc(r.name)} ${deptBadge(r.name)} <span class="tag">${esc(r.site)}</span></div>
               <span class="tag ${r.diff>=0?'g':'r'}">${r.diff>=0?'+':''}${r.diff}h (${r.rate}%)</span>
             </div>
             <div class="meta">
