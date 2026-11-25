@@ -490,12 +490,26 @@ function showAttDetail(emp, noScroll){
   if(!d){$('#attDetWrap').innerHTML='';return;}
   const co=Math.min(d.cutoff_day||d.days.length, d.days.length);
   const maxCum=Math.max(...d.cum_hours.slice(0,co), ...d.cum_base.slice(0,co), 1);
-  const W=620, H=150, P=20;
-  const pts=(arr)=>arr.slice(0,co).map((v,idx)=>{
-    const x=P+(co>1?idx/(co-1)*(W-P*2):0);
-    const y=H-P-(v/maxCum*(H-P*2));
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(' ');
+  const W=620, H=165, Px=26, Py=22, plotW=W-Px*2, plotH=H-Py*2;
+  const step=co>0?plotW/co:plotW;
+  const barW=Math.max(4, Math.min(18, step*0.65));
+  const xCenter=(idx)=>Px+step*idx+step/2;
+  const yVal=(v)=>H-Py-(v/maxCum*plotH);
+  const bars=d.cum_hours.slice(0,co).map((v,idx)=>{
+    const x=xCenter(idx)-barW/2;
+    const y=yVal(v);
+    const h=Math.max(1, (H-Py)-y);
+    const ok=v>=(d.cum_base[idx]||0);
+    const fill=ok?'#38bdf8':'#f87171';
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${fill}" fill-opacity="0.82"><title>${d.days[idx]}일 · 실근무 누적 ${v}h / 기준 ${d.cum_base[idx]}h</title></rect>`;
+  }).join('');
+  const basePts=d.cum_base.slice(0,co).map((v,idx)=>`${xCenter(idx).toFixed(1)},${yVal(v).toFixed(1)}`).join(' ');
+  const xTicks=d.days.slice(0,co).map((day,idx)=>{
+    if(idx===0||idx===co-1||idx%Math.max(1,Math.floor(co/8))===0){
+      return `<text x="${xCenter(idx).toFixed(1)}" y="${H-6}" text-anchor="middle" fill="#64748b" font-size="9">${day}일</text>`;
+    }
+    return '';
+  }).join('');
 
   let rows='';
   for(let i=0;i<co;i++){
@@ -518,13 +532,19 @@ function showAttDetail(emp, noScroll){
         <div class="kpi"><b style="color:${d.diff_hours[co-1]>=0?'var(--green)':'var(--red)'}">${d.diff_hours[co-1]>=0?'+':''}${d.diff_hours[co-1]}h</b><i>과부족</i></div>
       </div>
       <div class="svgbox">
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:360px;height:150px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
-          <polyline fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="4 4" points="${pts(d.cum_base)}"/>
-          <polyline fill="none" stroke="#38bdf8" stroke-width="2.5" points="${pts(d.cum_hours)}"/>
+        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:360px;height:165px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
+          <line x1="${Px}" y1="${(Py+plotH/2).toFixed(1)}" x2="${W-Px}" y2="${(Py+plotH/2).toFixed(1)}" stroke="#1e293b" stroke-dasharray="2 3"/>
+          <line x1="${Px}" y1="${H-Py}" x2="${W-Px}" y2="${H-Py}" stroke="#334155"/>
+          <text x="${Px-4}" y="${Py+4}" text-anchor="end" fill="#64748b" font-size="8.5">${Math.round(maxCum)}h</text>
+          <text x="${Px-4}" y="${(Py+plotH/2+3).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="8.5">${Math.round(maxCum/2)}h</text>
+          ${bars}
+          <polyline fill="none" stroke="#fbbf24" stroke-width="2.4" stroke-dasharray="5 3" points="${basePts}"/>
+          ${xTicks}
         </svg>
         <div class="legend">
-          <span><i class="dot" style="background:#38bdf8"></i>누적 실근무</span>
-          <span><i class="dot" style="background:#64748b"></i>누적 기준 (점선)</span>
+          <span><i class="dot" style="background:#38bdf8"></i>누적 실근무 (기준 충족)</span>
+          <span><i class="dot" style="background:#f87171"></i>누적 실근무 (기준 미달)</span>
+          <span><i class="dot" style="background:#fbbf24"></i>누적 기준 (점선)</span>
         </div>
       </div>
       <div>${rows||'<div class="empty">기록 없음</div>'}</div>
