@@ -311,7 +311,58 @@ function renderTaskCharts(){
           <div class="wcnt">${cnt}건</div>
         </div>`).join(''):'<div class="empty">집계 없음</div>'}
     </div>
-    ${renderBacklogChart(m.backlog_trend, ms)}`;
+    ${renderProtoChart(p.chart, ps)}
+    ${renderBacklogChart(m.backlog_trend, ms)}
+    ${renderImdsQuarterlyChart(i.quarterly_summary)}`;
+}
+
+function renderProtoChart(c, ps){
+  if(!c || !Array.isArray(c.labels) || !c.labels.length) return '';
+  const mx=Math.max(...(c.plan_qty||[1]),...(c.prod_qty||[1]),1);
+  return `<div class="card">
+    <h2><span>⚡ 시작실 주요 과제 계획 vs 실적</span><span class="tag">달성률 ${ps.overall_achievement_rate??'-'}%</span></h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${c.labels.slice(0,6).map((lb,idx)=>{
+      const pl=(c.plan_qty||[])[idx]||0, pr=(c.prod_qty||[])[idx]||0, rt=(c.rates||[])[idx]||0;
+      return `<div style="background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 6px;text-align:center">
+        <div style="font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px" title="${esc(lb)}">${esc(lb)}</div>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:44px;margin-bottom:5px">
+          <div title="계획 ${pl}" style="width:11px;height:${Math.max(4,Math.round(pl/mx*40))}px;background:#475569;border-radius:2px 2px 0 0"></div>
+          <div title="실적 ${pr}" style="width:11px;height:${Math.max(4,Math.round(pr/mx*40))}px;background:#38bdf8;border-radius:2px 2px 0 0"></div>
+        </div>
+        <div style="font-size:9.5px;color:#94a3b8">${pr.toLocaleString()}/${pl.toLocaleString()} <b style="color:#34d399">${rt}%</b></div>
+      </div>`;
+    }).join('')}</div>
+    <div class="legend">
+      <span><i class="dot" style="background:#475569"></i>계획 (Plan)</span>
+      <span><i class="dot" style="background:#38bdf8"></i>실적 (Prod)</span>
+      <span>총 ${(ps.total_prod_qty||0).toLocaleString()} / ${(ps.total_plan_qty||0).toLocaleString()} EA</span>
+    </div>
+  </div>`;
+}
+
+function renderImdsQuarterlyChart(q){
+  if(!q || !Array.isArray(q.quarters) || !q.quarters.length) return '';
+  const tot=q.total||{}, mx=Math.max(...(q.receipt||[1]),...(q.completed_total||[1]),1), mxO=Math.max(...(q.ongoing||[1]),1);
+  return `<div class="card">
+    <h2><span>🌿 IMDS 분기별 실적 &amp; 잔여 (2026Y)</span><span class="tag y">Q4 잔여 ${tot.ongoing??31}건 · 완료 ${tot.completion_rate??97.8}%</span></h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${q.quarters.map((qt,idx)=>{
+      const rec=(q.receipt||[])[idx]||0, done=(q.completed_total||[])[idx]||0, ong=(q.ongoing||[])[idx]||0;
+      return `<div style="background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 5px;text-align:center">
+        <div style="font-size:11px;font-weight:800;color:#f1f5f9;margin-bottom:5px">${esc(qt)}</div>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:52px;margin-bottom:5px">
+          <div title="접수 ${rec}" style="width:9px;height:${Math.max(4,Math.round(rec/mx*48))}px;background:#38bdf8;border-radius:2px 2px 0 0"></div>
+          <div title="완료 ${done}" style="width:9px;height:${Math.max(4,Math.round(done/mx*48))}px;background:#34d399;border-radius:2px 2px 0 0"></div>
+          <div title="잔여 ${ong}" style="width:9px;height:${Math.max(4,Math.round(ong/mxO*48))}px;background:#fb923c;border-radius:2px 2px 0 0"></div>
+        </div>
+        <div style="font-size:9.5px;color:#94a3b8;line-height:1.35">접수 <b style="color:#38bdf8">${rec}</b><br>완료 <b style="color:#34d399">${done}</b><br>잔여 <b style="color:#fb923c">${ong}</b></div>
+      </div>`;
+    }).join('')}</div>
+    <div class="legend">
+      <span><i class="dot" style="background:#38bdf8"></i>접수 (${(tot.receipt??1415).toLocaleString()})</span>
+      <span><i class="dot" style="background:#34d399"></i>완료 (${(tot.completed_total??1384).toLocaleString()})</span>
+      <span><i class="dot" style="background:#fb923c"></i>이월 잔여 (Q4 ${tot.ongoing??31}건)</span>
+    </div>
+  </div>`;
 }
 
 function renderBacklogChart(bt, ms){
@@ -532,15 +583,17 @@ function render(){
         </div>`;
       })+
     section('imds','🖥️ System · IMDS / CAMDS',
-      [['전체 건수',is.total_count],['진행/의뢰',is.requested_count],['대기 건수',is.standby_count]],
+      [['전체 (10월~)',is.total_count],['진행중 (X·Y미기록)',is.ongoing_count??((is.requested_count||0)+(is.standby_count||0))],['완료 건수',is.completed_count]],
       i.today_tasks, x=>{
-        return `<div class="tcard p1">
-          <div class="tcard-top"><div class="ttitle">${esc(x.part_desc)}</div><span class="tag">${esc(x.type)}</span></div>
+        const isReq=x.status_code==='requested';
+        const dtChip=x.due_date?dueTag(x.due_date):(x.req_date?`<span class="chip">📅 의뢰 ${esc(x.req_date)}</span>`:(x.receipt_date?`<span class="chip">📅 접수 ${esc(x.receipt_date)}</span>`:''));
+        return `<div class="tcard ${isReq?'p1':''}">
+          <div class="tcard-top"><div class="ttitle">${x.req_no?'#'+esc(x.req_no)+' ':''}${esc(x.part_desc)}</div><span class="tag">${esc(x.type)}</span></div>
           <div class="meta">
-            <span class="chip">🏢 ${esc(x.customer)}</span>
+            <span class="chip">🏢 ${esc(x.customer||'-')}</span>
             <span class="chip">👤 ${esc(x.pe_owner||'미지정')}</span>
-            ${dueTag(x.due_date)}
-            <span class="tag y">${esc(x.status_label)}</span>
+            ${dtChip}
+            <span class="tag ${isReq?'g':'y'}">${isReq?'의뢰중':'진행'}</span>
           </div>
         </div>`;
       });
