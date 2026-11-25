@@ -320,16 +320,18 @@ function renderProtoChart(c, ps){
   if(!c || !Array.isArray(c.labels) || !c.labels.length) return '';
   const mx=Math.max(...(c.plan_qty||[1]),...(c.prod_qty||[1]),1);
   return `<div class="card">
-    <h2><span>⚡ 시작실 주요 과제 계획 vs 실적</span><span class="tag">달성률 ${ps.overall_achievement_rate??'-'}%</span></h2>
+    <h2><span>⚡ 시작실 주요 과제 계획 vs 실적</span><span class="tag">전체 달성률 ${ps.overall_achievement_rate??'-'}%</span></h2>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${c.labels.slice(0,6).map((lb,idx)=>{
       const pl=(c.plan_qty||[])[idx]||0, pr=(c.prod_qty||[])[idx]||0, rt=(c.rates||[])[idx]||0;
+      const rtColor=rt>=100?'#34d399':(rt>=70?'#38bdf8':'#fbbf24');
       return `<div style="background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 6px;text-align:center">
-        <div style="font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px" title="${esc(lb)}">${esc(lb)}</div>
-        <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:44px;margin-bottom:5px">
-          <div title="계획 ${pl}" style="width:11px;height:${Math.max(4,Math.round(pl/mx*40))}px;background:#475569;border-radius:2px 2px 0 0"></div>
-          <div title="실적 ${pr}" style="width:11px;height:${Math.max(4,Math.round(pr/mx*40))}px;background:#38bdf8;border-radius:2px 2px 0 0"></div>
+        <div style="font-size:10px;font-weight:700;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px" title="${esc(lb)}">${esc(lb)}</div>
+        <div style="margin-bottom:4px"><span style="font-size:10px;font-weight:800;color:${rtColor};background:rgba(56,189,248,0.12);padding:1px 6px;border-radius:99px">${rt}%</span></div>
+        <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:40px;margin-bottom:4px">
+          <div title="계획 ${pl}" style="width:11px;height:${Math.max(4,Math.round(pl/mx*36))}px;background:#475569;border-radius:2px 2px 0 0"></div>
+          <div title="실적 ${pr}" style="width:11px;height:${Math.max(4,Math.round(pr/mx*36))}px;background:#38bdf8;border-radius:2px 2px 0 0"></div>
         </div>
-        <div style="font-size:9.5px;color:#94a3b8">${pr.toLocaleString()}/${pl.toLocaleString()} <b style="color:#34d399">${rt}%</b></div>
+        <div style="font-size:9px;color:#94a3b8">${pr.toLocaleString()} / ${pl.toLocaleString()}</div>
       </div>`;
     }).join('')}</div>
     <div class="legend">
