@@ -12,6 +12,7 @@
   --blue:#38bdf8;--indigo:#818cf8;--green:#34d399;--amber:#fbbf24;--red:#f87171;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{max-width:100%;overflow-x:hidden}
 body{
   margin:0;background:radial-gradient(1200px 500px at 15% -10%,#17255455,transparent),var(--bg);
   color:var(--text);font-family:-apple-system,"Pretendard","Malgun Gothic","Segoe UI",sans-serif;
@@ -130,7 +131,14 @@ main{padding:16px}
 .empty{color:var(--dim);text-align:center;padding:18px;font-size:12.5px}
 .err{color:#fca5a5;background:#4c1d2433;border:1px solid #7f1d1d;border-radius:10px;padding:14px}
 footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);font-size:11.5px;text-align:center}
+.proto-c-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.imds-q-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 @media(max-width:600px){
+  .proto-c-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .imds-q-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .ctrl{width:100%}
+  .card,.tcard{min-width:0;max-width:100%}
+  .ttitle{word-break:break-word;overflow-wrap:anywhere}
   body{font-size:10.5px;line-height:1.35}
   header{padding:6px 9px}
   .hdr{gap:6px}
@@ -321,7 +329,7 @@ function renderProtoChart(c, ps){
   const mx=Math.max(...(c.plan_qty||[1]),...(c.prod_qty||[1]),1);
   return `<div class="card">
     <h2><span>⚡ 시작실 주요 과제 계획 vs 실적</span><span class="tag">전체 달성률 ${ps.overall_achievement_rate??'-'}%</span></h2>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${c.labels.slice(0,6).map((lb,idx)=>{
+    <div class="proto-c-grid">${c.labels.slice(0,6).map((lb,idx)=>{
       const pl=(c.plan_qty||[])[idx]||0, pr=(c.prod_qty||[])[idx]||0, rt=(c.rates||[])[idx]||0;
       const rtColor=rt>=100?'#34d399':(rt>=70?'#38bdf8':'#fbbf24');
       return `<div style="background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 6px;text-align:center">
@@ -347,7 +355,7 @@ function renderImdsQuarterlyChart(q){
   const tot=q.total||{}, mx=Math.max(...(q.receipt||[1]),...(q.completed_total||[1]),1), mxO=Math.max(...(q.ongoing||[1]),1);
   return `<div class="card">
     <h2><span>🌿 IMDS 분기별 실적 &amp; 잔여 (2026Y)</span><span class="tag y">Q4 잔여 ${tot.ongoing??31}건 · 완료 ${tot.completion_rate??97.8}%</span></h2>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${q.quarters.map((qt,idx)=>{
+    <div class="imds-q-grid">${q.quarters.map((qt,idx)=>{
       const rec=(q.receipt||[])[idx]||0, done=(q.completed_total||[])[idx]||0, ong=(q.ongoing||[])[idx]||0;
       return `<div style="background:#0b1220;border:1px solid #1e293b;border-radius:8px;padding:7px 5px;text-align:center">
         <div style="font-size:11px;font-weight:800;color:#f1f5f9;margin-bottom:5px">${esc(qt)}</div>
@@ -533,8 +541,8 @@ function showAttDetail(emp, noScroll){
         <div class="kpi"><b>${d.cum_base[co-1]}h</b><i>누적 기준</i></div>
         <div class="kpi"><b style="color:${d.diff_hours[co-1]>=0?'var(--green)':'var(--red)'}">${d.diff_hours[co-1]>=0?'+':''}${d.diff_hours[co-1]}h</b><i>과부족</i></div>
       </div>
-      <div class="svgbox">
-        <svg viewBox="0 0 ${W} ${H}" style="width:100%;min-width:360px;height:165px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
+      <div class="svgbox" style="overflow-x:hidden">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;min-width:0;height:auto;max-height:175px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
           <line x1="${Px}" y1="${(Py+plotH/2).toFixed(1)}" x2="${W-Px}" y2="${(Py+plotH/2).toFixed(1)}" stroke="#1e293b" stroke-dasharray="2 3"/>
           <line x1="${Px}" y1="${H-Py}" x2="${W-Px}" y2="${H-Py}" stroke="#334155"/>
           <text x="${Px-4}" y="${Py+4}" text-anchor="end" fill="#64748b" font-size="8.5">${Math.round(maxCum)}h</text>
