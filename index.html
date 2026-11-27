@@ -321,7 +321,29 @@ function renderTaskCharts(){
     </div>
     ${renderProtoChart(p.chart, ps)}
     ${renderBacklogChart(m.backlog_trend, ms)}
-    ${renderImdsQuarterlyChart(i.quarterly_summary)}`;
+    ${renderImdsQuarterlyChart(i.quarterly_summary)}
+    ${renderCmdtMonthlyChart(DATA.cmdt)}`;
+}
+
+function renderCmdtMonthlyChart(cm){
+  if(!cm || !Array.isArray(cm.month_labels) || !cm.month_labels.length) return '';
+  const lbs=cm.month_labels, plants=cm.plants||[], ser=cm.series_by_plant||{}, tots=cm.monthly_totals||[], pt=cm.plant_totals||{}, cs=cm.stats||{};
+  const cols=['#38bdf8','#22d3ee','#a78bfa','#34d399','#fbbf24','#f472b6','#f87171','#94a3b8'];
+  const mx=Math.max(...tots,1);
+  return `<div class="card">
+    <h2><span>📈 CMDT 월별 등록 추이 (공장별 · 2026Y)</span><span class="tag">누적 ${(cs.total_2026_count??0).toLocaleString()}건</span></h2>
+    <div style="display:flex;align-items:flex-end;gap:5px;height:100px;padding:10px 4px 20px;background:#0b1220;border:1px solid #1e293b;border-radius:8px;overflow-x:auto">
+      ${lbs.map((lb,idx)=>{const tot=tots[idx]||0,h=Math.max(4,Math.round(tot/mx*64));
+        return `<div style="flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative" title="${esc(lb)} 총 ${tot}건">
+          <span style="font-size:9px;color:#cbd5e1;font-weight:700;margin-bottom:2px">${tot}</span>
+          <div style="width:14px;height:${h}px;display:flex;flex-direction:column-reverse;border-radius:2px 2px 0 0;overflow:hidden">
+            ${plants.map((pl,pi)=>{const v=(ser[pl]||[])[idx]||0;if(!v)return '';const sh=Math.max(1,Math.round(v/Math.max(tot,1)*h));return `<div title="Plant ${esc(pl)}: ${v}건" style="height:${sh}px;background:${cols[pi%cols.length]}"></div>`;}).join('')}
+          </div>
+          <span style="position:absolute;bottom:-16px;font-size:9.5px;color:#94a3b8">${esc(lb)}</span>
+        </div>`;}).join('')}
+    </div>
+    <div class="legend">${plants.map((pl,pi)=>`<span><i class="dot" style="background:${cols[pi%cols.length]}"></i>${esc(pl)} (${pt[pl]||0})</span>`).join('')}</div>
+  </div>`;
 }
 
 function renderProtoChart(c, ps){
@@ -626,7 +648,24 @@ function render(){
             <span class="tag ${isReq?'g':'y'}">${isReq?'의뢰중':'진행'}</span>
           </div>
         </div>`;
-      });
+      })+
+    (()=>{
+      const cm=DATA.cmdt||{}, cs=cm.stats||{}, tops=cm.top5_recent||[];
+      if(FILTER!=='all' && FILTER!=='imds' && FILTER!=='system') return '';
+      return `<section class="card">
+        <h2><span>📦 System · CMDT 최근 등록 Top 5</span><span class="tag">2026Y ${(cs.total_2026_count??0).toLocaleString()}건</span></h2>
+        <div class="kpis">
+          <div class="kpi"><b>${(cs.total_2026_count??0).toLocaleString()}</b><i>2026Y 누적</i></div>
+          <div class="kpi"><b>${(cs.as_2026_count??0).toLocaleString()}</b><i>AS (CS/CC)</i></div>
+          <div class="kpi"><b>${(cs.kum_2026_count??0).toLocaleString()}</b><i>KUM (2026Y)</i></div>
+          <div class="kpi"><b>${(cs.latest_month_count??0).toLocaleString()}</b><i>${esc(cs.latest_month||'최근월')}</i></div>
+        </div>
+        <div class="list">${tops.length?tops.map(x=>`<div class="tcard">
+          <div class="tcard-top"><div class="ttitle">${esc(x.part_no)}${x.part_desc?' · '+esc(x.part_desc):''}</div><span class="tag ${x.source==='AS'?'':'y'}">${esc(x.source)} · ${esc(x.plant)}</span></div>
+          <div class="meta"><span class="chip">🏭 Plant ${esc(x.plant)}</span>${x.pe_owner?`<span class="chip">👤 ${esc(x.pe_owner)}</span>`:''}<span class="chip">📅 ${esc(x.reg_date)}</span></div>
+        </div>`).join(''):'<div class="empty">최근 등록 항목 없음</div>'}</div>
+      </section>`;
+    })();
 
   if(FILTER==='all'||FILTER==='system'){
     const doms=(sy.domains||[]).filter(x=>match(x,kw));
