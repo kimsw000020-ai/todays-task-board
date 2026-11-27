@@ -54,7 +54,10 @@ main{padding:16px}
 }
 .tab.on{background:rgba(56,189,248,.14);color:var(--blue);border-color:rgba(56,189,248,.45)}
 
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:16px;align-items:stretch}
+.charts .card{display:flex;flex-direction:column;justify-content:space-between;min-height:228px}
+.charts .chart-body{flex:1;display:flex;flex-direction:column;justify-content:center}
+.charts .chart-box{width:100%;height:130px;background:#0b1220;border:1px solid #1e293b;border-radius:10px;box-sizing:border-box}
 .card{
   background:linear-gradient(180deg,#111827,#0f172a);
   border:1px solid var(--border);border-radius:14px;padding:15px;
@@ -154,6 +157,8 @@ footer{max-width:1220px;margin:10px auto 26px;padding:0 16px;color:var(--dim);fo
   .tabs{gap:4px;margin-bottom:8px}
   .tab{padding:3.5px 8px;font-size:10px}
   .grid,.charts{grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+  .charts .card{min-height:200px}
+  .charts .chart-box{height:122px}
   .card{padding:8px 9px;border-radius:10px}
   .card h2{font-size:11.5px;margin-bottom:7px}
   .gauge .gwrap{max-width:92px}
@@ -292,20 +297,24 @@ function renderTaskCharts(){
   $('#charts').innerHTML=`
     <div class="card">
       <h2><span>📊 부문별 핵심 달성률</span><span class="tag g">KPI</span></h2>
-      <div class="gauges">
-        ${gaugeSvg(ps.overall_achievement_rate,'#38bdf8','Proto 달성률')}
-        ${gaugeSvg(ms.pass_rate,'#34d399','측정 합격률')}
-        ${gaugeSvg(is.completion_rate,'#818cf8','IMDS 완료율')}
+      <div class="chart-body">
+        <div class="gauges">
+          ${gaugeSvg(ps.overall_achievement_rate,'#38bdf8','Proto 달성률')}
+          ${gaugeSvg(ms.pass_rate,'#34d399','측정 합격률')}
+          ${gaugeSvg(is.completion_rate,'#818cf8','IMDS 완료율')}
+        </div>
       </div>
     </div>
     <div class="card">
       <h2><span>👥 금일 중점 업무 분포</span><span class="tag">총 ${totalToday}건</span></h2>
-      ${topO.length?topO.map(([name,cnt])=>`
-        <div class="wrow">
-          <div class="wname" title="${esc(name)}">${esc(name)}</div>
-          <div class="wtrack"><i style="width:${(cnt/maxO*100).toFixed(0)}%"></i></div>
-          <div class="wcnt">${cnt}건</div>
-        </div>`).join(''):'<div class="empty">집계 없음</div>'}
+      <div class="chart-body">
+        ${topO.length?topO.map(([name,cnt])=>`
+          <div class="wrow">
+            <div class="wname" title="${esc(name)}">${esc(name)}</div>
+            <div class="wtrack"><i style="width:${(cnt/maxO*100).toFixed(0)}%"></i></div>
+            <div class="wcnt">${cnt}건</div>
+          </div>`).join(''):'<div class="empty">집계 없음</div>'}
+      </div>
     </div>
     ${renderProtoChart(p.chart, ps)}
     ${renderBacklogChart(m.backlog_trend, ms)}
@@ -320,8 +329,8 @@ function renderCmdtMonthlyChart(cm){
   const mx=Math.max(...tots,1);
   return `<div class="card">
     <h2><span>📈 CMDT 월별 등록 추이 (공장별 · 2026Y)</span><span class="tag">누적 ${(cs.total_2026_count??0).toLocaleString()}건</span></h2>
-    <div style="display:flex;align-items:flex-end;gap:5px;height:100px;padding:10px 4px 20px;background:#0b1220;border:1px solid #1e293b;border-radius:8px;overflow-x:auto">
-      ${lbs.map((lb,idx)=>{const tot=tots[idx]||0,h=Math.max(4,Math.round(tot/mx*64));
+    <div class="chart-box" style="display:flex;align-items:flex-end;gap:5px;padding:10px 6px 22px;overflow-x:auto">
+      ${lbs.map((lb,idx)=>{const tot=tots[idx]||0,h=Math.max(4,Math.round(tot/mx*82));
         return `<div style="flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative" title="${esc(lb)} 총 ${tot}건">
           <span style="font-size:9px;color:#cbd5e1;font-weight:700;margin-bottom:2px">${tot}</span>
           <div style="width:14px;height:${h}px;display:flex;flex-direction:column-reverse;border-radius:2px 2px 0 0;overflow:hidden">
@@ -345,19 +354,21 @@ function renderProtoChart(c, ps){
   const mx=Math.max(...rows.map(r=>Math.max(r.pl,r.pr)),1);
   return `<div class="card">
     <h2><span>⚡ 시작실 주요 과제 계획 vs 실적</span><span class="tag">전체 달성률 ${ps.overall_achievement_rate??'-'}%</span></h2>
-    ${rows.map(r=>{
-      const barCol=r.rt>=100?'#34d399':(r.rt>=70?'#38bdf8':'#fbbf24');
-      const pw=Math.min(100,Math.round(r.pl/mx*100));
-      const aw=Math.min(100,Math.round(r.pr/mx*100));
-      return `<div class="wrow" style="grid-template-columns:86px 1fr 78px" title="${esc(r.lb)}: 실적 ${r.pr.toLocaleString()} / 계획 ${r.pl.toLocaleString()} (${r.rt}%)">
-        <div class="wname">${esc(r.lb)}</div>
-        <div class="wtrack" style="position:relative;height:10px;background:#0b1220;border:1px solid #1e293b">
-          <div style="position:absolute;inset:0;width:${pw}%;background:#334155;border-radius:99px"></div>
-          <div style="position:relative;width:${aw}%;height:100%;background:${barCol};border-radius:99px"></div>
-        </div>
-        <div class="wcnt" style="color:${barCol};font-size:10.5px">${r.pr.toLocaleString()}/${r.pl.toLocaleString()} <span style="opacity:.85">(${r.rt}%)</span></div>
-      </div>`;
-    }).join('')}
+    <div class="chart-body">
+      ${rows.map(r=>{
+        const barCol=r.rt>=100?'#34d399':(r.rt>=70?'#38bdf8':'#fbbf24');
+        const pw=Math.min(100,Math.round(r.pl/mx*100));
+        const aw=Math.min(100,Math.round(r.pr/mx*100));
+        return `<div class="wrow" style="grid-template-columns:86px 1fr 78px" title="${esc(r.lb)}: 실적 ${r.pr.toLocaleString()} / 계획 ${r.pl.toLocaleString()} (${r.rt}%)">
+          <div class="wname">${esc(r.lb)}</div>
+          <div class="wtrack" style="position:relative;height:10px;background:#0b1220;border:1px solid #1e293b">
+            <div style="position:absolute;inset:0;width:${pw}%;background:#334155;border-radius:99px"></div>
+            <div style="position:relative;width:${aw}%;height:100%;background:${barCol};border-radius:99px"></div>
+          </div>
+          <div class="wcnt" style="color:${barCol};font-size:10.5px">${r.pr.toLocaleString()}/${r.pl.toLocaleString()} <span style="opacity:.85">(${r.rt}%)</span></div>
+        </div>`;
+      }).join('')}
+    </div>
     <div class="legend">
       <span><i class="dot" style="background:#334155"></i>계획 (Plan)</span>
       <span><i class="dot" style="background:#38bdf8"></i>실적 (Prod)</span>
@@ -370,7 +381,7 @@ function renderImdsQuarterlyChart(q){
   if(!q || !Array.isArray(q.quarters) || !q.quarters.length) return '';
   const tot=q.total||{}, qs=q.quarters;
   const rec=q.receipt||[], done=q.completed_total||[], ong=q.ongoing||[];
-  const W=340, H=132, Px=28, Py=22, bot=H-22;
+  const W=340, H=130, Px=28, Py=22, bot=H-22;
   const mxBar=Math.max(...rec, ...done, 1);
   const mxOng=Math.max(...ong, 1);
   const step=(W-Px*2)/qs.length;
@@ -386,7 +397,7 @@ function renderImdsQuarterlyChart(q){
   const oLine=pts.map(p=>`${p.cx.toFixed(1)},${p.oY.toFixed(1)}`).join(' ');
   return `<div class="card">
     <h2><span>🌿 IMDS 분기별 실적 &amp; 잔여 (2026Y)</span><span class="tag y">Q4 잔여 ${tot.ongoing??31}건 · 완료 ${tot.completion_rate??97.8}%</span></h2>
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:132px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
+    <svg class="chart-box" viewBox="0 0 ${W} ${H}">
       ${pts.map(p=>`
         <rect x="${(p.cx-bw-2).toFixed(1)}" y="${(bot-p.rH).toFixed(1)}" width="${bw}" height="${p.rH}" rx="2" fill="#38bdf8" opacity="0.85"/>
         <text x="${(p.cx-bw/2-2).toFixed(1)}" y="${(bot-p.rH-3).toFixed(1)}" text-anchor="middle" fill="#7dd3fc" font-size="8.5" font-weight="700">${p.rV}</text>
@@ -418,7 +429,7 @@ function renderBacklogChart(bt, ms){
   }
   const view=pts.slice(-12);
   if(!view.length) return '';
-  const W=340, H=122, Px=18, Py=20, bot=H-18;
+  const W=340, H=130, Px=18, Py=20, bot=H-18;
   const vals=view.map(x=>x.val);
   const mx=Math.max(...vals, 1), mn=Math.max(0, Math.min(...vals)-3);
   const span=Math.max(mx-mn, 1);
@@ -435,7 +446,7 @@ function renderBacklogChart(bt, ms){
   const cur=bt.today_pending ?? ms.total_active_queue ?? view[view.length-1].val;
   return `<div class="card">
     <h2><span>📐 잔여 측정 건수 추이</span><span class="tag y">잔여 ${cur}건 · 완료 ${bt.completion_rate??'-'}%</span></h2>
-    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:122px;background:#0b1220;border-radius:10px;border:1px solid #1e293b">
+    <svg class="chart-box" viewBox="0 0 ${W} ${H}">
       ${coords.map(c=>c.dh>0?`
         <rect x="${(c.cx-bw/2).toFixed(1)}" y="${(bot-c.dh).toFixed(1)}" width="${bw}" height="${c.dh}" rx="2" fill="rgba(56,189,248,0.42)" stroke="#38bdf8" stroke-width="0.6"/>
         <text x="${c.cx.toFixed(1)}" y="${(bot-c.dh-2).toFixed(1)}" text-anchor="middle" fill="#7dd3fc" font-size="7.5" font-weight="700">${c.done}</text>
